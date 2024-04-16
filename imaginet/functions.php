@@ -289,6 +289,14 @@ function mycustom_flamingo_map_meta_cap($caps, $cap, $user_id, $args)
     return $caps;
 }
 
+function upload_svg_files($allowed)
+{
+	if (!current_user_can('administrator'))
+		return $allowed;
+	$allowed['svg'] = 'image/svg+xml';
+	return $allowed;
+}
+add_filter('upload_mimes', 'upload_svg_files');
 
 function isCurrentPage($pageSlug, $menuItem)
 {
