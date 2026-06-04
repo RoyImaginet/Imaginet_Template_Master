@@ -1,6 +1,5 @@
 <?php
-// ini_set('display_errors',1);
-// error_reporting(E_ALL);
+
 /*****************************************
  **  Languages
  *****************************************/
@@ -15,11 +14,11 @@ function imaginet_theme_textdomain()
 if (!defined('THEME')) {
     define("THEME", get_template_directory_uri());
 }
-define('ENV', 'dev'); // only when developing, after that change it to ''
+
 if (!defined('TEMPLATEPATH')) {
     define('TEMPLATEPATH', get_template_directory());
 }
-define('GOOGLE_API_KEY', 'SOME_KEY');
+
 /*****************************************
  **  Includes
  ****************************************/
@@ -48,6 +47,8 @@ if (function_exists('add_theme_support')) {
     add_theme_support('custom-logo');
     // Add title tag in wp_head
     add_theme_support('title-tag');
+	// Allows blocks to have "wide" and "full-width" alignments
+	add_theme_support( 'align-wide' );
     // Add Thumbnail Theme Support
     add_theme_support('post-thumbnails');
     // override media setting - Image sizes
@@ -57,9 +58,36 @@ if (function_exists('add_theme_support')) {
     // Enables post and comment RSS feed links to head
     add_theme_support('automatic-feed-links');
     // Enable support for wp galleries with figure tag
-    add_theme_support('html5', array('gallery'));
+    add_theme_support( 'html5', array( 
+	    'comment-list', 
+	    'comment-form', 
+	    'search-form', 
+	    'gallery', 
+	    'caption', 
+	    'style', 
+	    'script' 
+	) );
+	add_theme_support( 'post-formats', array( 
+        'aside', 
+        'gallery', 
+        'image', 
+        'video', 
+        'quote', 
+        'link' 
+    ) );
 }
-// Register Blank Navigation
+/*****************************************
+ **  Security
+ *****************************************/
+//============== Hide Wordpress version ===========
+function remove_wp_version() {
+    return '';
+}
+add_filter( 'the_generator', 'remove_wp_version' );
+//============== Disable  xmlrpc ===========
+add_filter( 'xmlrpc_enabled', '__return_false' );
+
+//============== Register menus ===========
 register_nav_menus(array( // Using array to specify more menus if needed
     'main-menu' => __('Main Menu', 'imaginet'), // Main Navigation
     'mobile-menu' => __('Mobile Menu', 'imaginet') // Mobile Navigation
