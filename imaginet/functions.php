@@ -47,8 +47,6 @@ if (function_exists('add_theme_support')) {
     add_theme_support('custom-logo');
     // Add title tag in wp_head
     add_theme_support('title-tag');
-	// Allows blocks to have "wide" and "full-width" alignments
-	add_theme_support( 'align-wide' );
     // Add Thumbnail Theme Support
     add_theme_support('post-thumbnails');
     // override media setting - Image sizes
@@ -140,209 +138,175 @@ if (!function_exists('add_body_class')) {
     add_filter('body_class', 'add_body_class');
 }
 
-// initialize ACF Google Maps API
-function my_acf_init()
-{
-    acf_update_setting('google_api_key', GOOGLE_API_KEY);
-}
-add_action('acf/init', 'my_acf_init');
 // Advanced Custom Fields Options Page
 if (function_exists('acf_add_options_page')) {
     acf_add_options_page(array(
-        'page_title'     => 'Theme General Settings',
+        'page_title'	=> 'Theme General Settings',
         'menu_title'    => 'General Settings',
         'menu_slug'     => 'theme-general-settings',
         'capability'    => 'edit_posts',
-        'redirect'        => false
+        'redirect'		=> false,
+		'position'      => 60,
     ));
 }
 // Pagination for paged posts, Page 1, Page 2, Page 3, with Next and Previous Links, No plugin
 function imaginet_pagination()
 {
     global $wp_query;
-    $big = 999999999;
-    echo paginate_links(array(
-        'base' => str_replace($big, '%#%', get_pagenum_link($big)),
-        'format' => '?paged=%#%',
-        'current' => max(1, get_query_var('paged')),
-        'total' => $wp_query->max_num_pages
-    ));
+
+    // Stop if there is only 1 page of posts
+    if ( $wp_query->max_num_pages <= 1 ) {
+        return;
+    }
+
+    echo '<nav class="pagination">';
+    echo paginate_links( array(
+        'current'   => max( 1, get_query_var( 'paged' ) ),
+        'total'     => $wp_query->max_num_pages,
+        'prev_text' => __( '&laquo; Prev', 'my-theme' ),
+        'next_text' => __( 'Next &raquo;', 'my-theme' ),
+        'type'      => 'list', // Outputs clean semantic <ul> and <li> tags instead of raw links
+    ) );
+    echo '</nav>';
 }
-// Add Custom Pagination
-add_action('init', 'imaginet_pagination'); // Add our Pagination
-add_action('acf/init', function () {
-    global $globalOptions;
-    $globalOptions = get_fields('options');
-});
-// Add Filters
-add_filter('widget_text', 'do_shortcode'); // Allow shortcodes in Dynamic Sidebar
-add_filter('the_excerpt', 'do_shortcode'); // Allows Shortcodes to be executed in Excerpt (Manual Excerpts only)
+
 // Remove the excerpt more 'read more btn'
-function remove_excerpt_more($more)
-{
-    global $post;
-    return '';
+function imaginet_custom_excerpt_more( $more ) {
+    return '&hellip;'; // Outputs an elegant … instead of [...]
 }
-add_filter('excerpt_more', 'remove_excerpt_more');
-// Change the excerpt length
-function new_excerpt_length($length)
-{
-    return 30;
-}
-add_filter('excerpt_length', 'new_excerpt_length');
-// tinymce color pallete
-function my_mce4_options($init)
-{
-    $default_colours = '';
-    $custom_colours = '
-		"16b1af", "Turquoise",
-		"df7d28", "Orange",
-		"a7cf3e", "Light Green",
-		"2f9de0", "Blue Sky",
-		"fff", "White",
-		"7d7d7d" , "Light Gray",
-		"555555" , "Dark Gray"
-	';
-    // build colour grid default+custom colors
-    $init['textcolor_map'] = '[' . $custom_colours . ',' . $default_colours . ']';
-    // enable 6th row for custom colours in grid
-    $init['textcolor_rows'] = 6;
+add_filter( 'excerpt_more', 'imaginet_custom_excerpt_more' );
+
+/**
+ * Force Custom Brand Colors inside ACF TinyMCE WYSIWYG Editors
+ */
+function my_theme_acf_wysiwyg_colors( $init ) {
+    
+    $custom_colours = array(
+        '16b1af', 'Turquoise',
+        'df7d28', 'Orange',
+        'a7cf3e', 'Light Green',
+        '2f9de0', 'Blue Sky',
+        'ffffff', 'White',
+        '7d7d7d', 'Light Gray',
+        '555555', 'Dark Gray'
+    );
+
+    $init['textcolor_map'] = json_encode( $custom_colours );
+
+    $init['textcolor_rows'] = 1; 
+
     return $init;
 }
-add_filter('tiny_mce_before_init', 'my_mce4_options');
+add_filter( 'tiny_mce_before_init', 'my_theme_acf_wysiwyg_colors' );
 
 
-//***************** no hebrew files  ***************/
-
-add_filter('wp_handle_upload_prefilter', 'hebrew_files_prevent');
-function hebrew_files_prevent($file)
-{
-    $filename = $file['name'];
-    if (preg_match('/[אבגדהוזחטיכלמנסעפצקרשתףץךםן]/', $filename, $matches)) {
-        $file['error'] = 'נא לא להעלות קבצים עם שמות בעברית!';
-    }
-    return $file;
-}
 /**
- * Responsive Image Helper Function
- * @param string $image_id the id of the image (from ACF or similar)
- * @param string $image_size the size of the thumbnail image or custom image size
- * @param string $max_width the max width this image will be shown to build the sizes attribute
+ * Automatically convert Hebrew file names to clean URL-safe text during upload.
  */
-function print_responsive_image_attr($image_id, $image_size, $max_width, $lazy = false)
-{
-    // check the image ID is not blank
-    if ($image_id != '') {
-        // set the default src image size
-        $image_src = wp_get_attachment_image_url($image_id, $image_size);
-        // set the srcset with various image sizes
-        $image_srcset = wp_get_attachment_image_srcset($image_id, $image_size);
-        if ($lazy) {
-            $data = 'data-';
+function my_theme_sanitize_hebrew_filenames( $filename ) {
+    // Convert Hebrew characters to their phonetic Latin equivalents (Transliteration)
+    // E.g., "תמונה" becomes "tmvnh" or safely url-encoded
+    $sanitized = remove_accents( $filename );
+
+    // Strip out any remaining illegal characters, spaces, or symbols
+    $sanitized = sanitize_file_name( $sanitized );
+
+    return $sanitized;
+}
+add_filter( 'sanitize_file_name', 'my_theme_sanitize_hebrew_filenames', 10 );
+
+
+/**
+ * Securely log PHP data to the private wp-content/debug.log file
+ */
+function imaginet_theme_log( $data ) {
+    if ( WP_DEBUG === true ) {
+        if ( is_array( $data ) || is_object( $data ) ) {
+            error_log( print_r( $data, true ) );
         } else {
-            $data = '';
+            error_log( $data );
         }
-        // generate the markup for the responsive image
-        echo $data . 'src="' . $image_src . '" ' . $data . 'srcset="' . $image_srcset . '" sizes="(max-width: ' . $max_width . ') 100vw, ' . $max_width . '"';
     }
 }
-function phpLog($logme)
-{
-    echo "<script>console.log(" . json_encode(var_export($logme, true)) . ");</script>";
-}
 /**
- * get Youtube ID
+ * Customize Flamingo Capabilities to allow Editors/Authors to view form submissions.
  */
-function getYoutubeId($video_uri)
-{
-    // determine the type of video and the video id
-    preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/", $video_uri, $matches);
-    //return thumbnail uri
-    return $matches[1];
-}
-/************************************************************/
-/**
- * Gets a Youtube thumbnail url
- * @param $id A vimeo id (ie. K4Rh8fyeJAE)
- * @param $size size of Thumbnail (0,1,2,3,"default","hqdefault","mqdefault","sddefault")
- * @return thumbnails url
- */
-function getYoutubeThumbUrl($id, $size = "0")
-{
-    $data = "http://img.youtube.com/vi/" . $id . "/" . $size . ".jpg";
-    return $data;
-}
-/************************************************************/
-/**
- *  get youtube title
- * @param  [type] $id [description]
- */
-function getYoutubeTitle($id)
-{
-    if (empty($id)) {
-        return null;
-    }
-    // returns a single line of XML that contains the video title. Not a giant request. Use '@' to suppress errors.
-    $content = @file_get_contents("http://youtube.com/get_video_info?video_id=" . $id);
-    if ($content) {
-        // look for that title tag and get the insides
-        parse_str($content, $ytarr);
-        $videoTitle = $ytarr['title'];
-        return $videoTitle;
-    } else {
-        return __('No title', 'text_domian');
-    }
-}
-remove_filter('map_meta_cap', 'flamingo_map_meta_cap');
-add_filter('map_meta_cap', 'mycustom_flamingo_map_meta_cap', 9, 4);
-function mycustom_flamingo_map_meta_cap($caps, $cap, $user_id, $args)
-{
+function my_theme_custom_flamingo_caps( $caps, $cap, $user_id, $args ) {
+    // Map Flamingo's strict admin capabilities to standard post capabilities
     $meta_caps = array(
-        'flamingo_edit_contact' => 'edit_posts',
-        'flamingo_edit_contacts' => 'edit_posts',
-        'flamingo_delete_contact' => 'edit_posts',
-        'flamingo_edit_inbound_message' => 'publish_posts',
-        'flamingo_edit_inbound_messages' => 'publish_posts',
+        'flamingo_edit_contact'           => 'edit_posts',
+        'flamingo_edit_contacts'          => 'edit_posts',
+        'flamingo_delete_contact'         => 'edit_posts',
+        'flamingo_edit_inbound_message'   => 'publish_posts',
+        'flamingo_edit_inbound_messages'  => 'publish_posts',
         'flamingo_delete_inbound_message' => 'publish_posts',
-        'flamingo_delete_inbound_messages' => 'publish_posts',
-        'flamingo_spam_inbound_message' => 'publish_posts',
+        'flamingo_delete_inbound_messages'=> 'publish_posts',
+        'flamingo_spam_inbound_message'   => 'publish_posts',
         'flamingo_unspam_inbound_message' => 'publish_posts',
-        'flamingo_edit_outbound_message' => 'publish_posts',
+        'flamingo_edit_outbound_message'  => 'publish_posts',
         'flamingo_edit_outbound_messages' => 'publish_posts',
-        'flamingo_delete_outbound_message' => 'publish_posts',
+        'flamingo_delete_outbound_message'=> 'publish_posts',
     );
-    $caps = array_diff($caps, array_keys($meta_caps));
-    if (isset($meta_caps[$cap]))
-        $caps[] = $meta_caps[$cap];
+
+    // If the capability being checked belongs to Flamingo, swap it out
+    if ( isset( $meta_caps[ $cap ] ) ) {
+        $caps = array_diff( $caps, array_keys( $meta_caps ) );
+        $caps[] = $meta_caps[ $cap ];
+    }
+
     return $caps;
 }
 
-function upload_svg_files($allowed)
-{
-	if (!current_user_can('administrator'))
-		return $allowed;
-	$allowed['svg'] = 'image/svg+xml';
-	return $allowed;
-}
-add_filter('upload_mimes', 'upload_svg_files');
+// Only hook this filtering system if Flamingo is actually installed and active
+add_action( 'plugins_loaded', function() {
+    if ( function_exists( 'flamingo_init' ) || class_exists( 'Flamingo_Inbound_Message' ) ) {
+        remove_filter( 'map_meta_cap', 'flamingo_map_meta_cap' );
+        add_filter( 'map_meta_cap', 'my_theme_custom_flamingo_caps', 9, 4 );
+    }
+});
 
-function isCurrentPage($pageSlug, $menuItem)
-{
-    $target = $menuItem->post_name;
-    if (is_numeric($menuItem->post_name)) {
-        $target = $menuItem->object;
+/**
+ * Safely allow Administrators to upload and preview SVG files
+ */
+function my_theme_enable_svg_uploads( $mimes ) {
+    // Only allow Admins to bypass the restriction
+    if ( ! current_user_can( 'administrator' ) ) {
+        return $mimes;
     }
-    // echo 'slug: ' . $pageSlug . PHP_EOL . 'menu: ' . $menuItem->post_name;
-    return !empty($pageSlug) && $pageSlug == $target;
+
+    // Explicitly inject the correct mime types
+    $mimes['svg']  = 'image/svg+xml';
+    $mimes['svgz'] = 'image/svg+xml'; // Supports compressed SVGs too
+
+    return $mimes;
 }
-function cleanData($data)
-{
-    foreach ($data as $key => $value) {
-        if (is_array($value)) {
-            $data[$key] = cleanData($value);
-            continue;
-        }
-        $data[$key] = sanitize_text_field($value);
+add_filter( 'upload_mimes', 'my_theme_enable_svg_uploads' );
+
+/**
+ * Fix SVG thumbnails showing as blank squares in the Media Library grid view
+ */
+function my_theme_fix_svg_previews( $response, $attachment, $meta ) {
+    if ( isset( $response['mime'] ) && $response['mime'] === 'image/svg+xml' ) {
+        // Force the display URL to point to the raw SVG file so it renders a thumbnail preview
+        $response['sizes'] = array(
+            'full' => array(
+                'url' => $response['url'],
+            ),
+        );
     }
-    return $data;
+    return $response;
 }
+add_filter( 'wp_prepare_attachment_for_js', 'my_theme_fix_svg_previews', 10, 3 );
+
+/**
+ * Clean up frontend styles and remove legacy block optimization scripts
+ */
+function my_theme_cleanup_assets() {
+    // Disable global styles rendering inline if you only use theme.json
+    wp_dequeue_style( 'global-styles' );
+    
+    // Remove classic theme fallback styles
+    wp_dequeue_style( 'wp-block-library' );
+    wp_dequeue_style( 'wp-block-library-theme' );
+}
+add_action( 'wp_enqueue_scripts', 'my_theme_cleanup_assets', 100 );
