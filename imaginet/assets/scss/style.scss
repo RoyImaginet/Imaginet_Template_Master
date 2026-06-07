@@ -29,7 +29,7 @@ h5,
 h6 {
     position: relative;
     display: block;
-    font-family: $main-font-family;
+    font-family: $title-font-family;
     line-height: 1.2;
 }
 
@@ -70,19 +70,10 @@ em {
     font-style: italic;
 }
 
-ul li,
-ol li {
-    text-align: left;
-}
-
 a,
 input[type="submit"],
 button,
 .transition {
-    -webkit-transition: all 400ms ease;
-    -moz-transition: all 400ms ease;
-    -ms-transition: all 400ms ease;
-    -o-transition: all 400ms ease;
     transition: all 400ms ease;
 }
 
@@ -120,8 +111,6 @@ img.grayscale:hover {
 
 .content ol,
 .content ul {
-    margin-left: 10px;
-    padding-left: 10px;
     font-size: 2rem;
     line-height: 1.5;
     margin-bottom: 8px;
@@ -159,83 +148,72 @@ img.grayscale:hover {
     align-items: center;
     justify-content: space-between;
 }
-header{
-    
-}
 
-/** Main Menu */
+/*============================== Main Menu =========================*/
 ul#main-menu {
     position: relative;
     display: flex;
     flex-direction: row;
     list-style: none;
+    >li {
+        position: relative;
+        >a {
+            position: relative;
+            display: block;
+            font-size: 2rem;
+            color: $primary-color;
+            line-height: 2;
+            padding: 5px 10px;
+            &:focus, &:hover {
+                text-decoration: none;
+                color: $text-color;
+            }
+        }
+    }
+    li.current-menu-item>a {
+        color: $text-color;
+    }
 }
 
-ul#main-menu>li {
-    position: relative;
+/*============================== Sub Menu =========================*/
+
+ul#main-menu {
+    ul.sub-menu {
+        position: absolute;
+        z-index: 10;
+        left: -15px;
+        top: 100%;
+        width: 250px;
+        display: none;
+        li {
+            position: relative;
+            display: block;
+            background: #fff;
+            a {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px;
+                color: $primary-color;
+                margin-right: 2px;
+                margin-left: 2px;
+                &:hover, &:focus {
+                   text-decoration: none;
+                    color: $text-color; 
+                }
+            }
+            &:hover>a {
+                color: $text-color;
+            }
+        }
+    }
+    >li.menu-item-has-children:hover>ul.sub-menu {
+        display: block;
+    }
 }
 
-ul#main-menu>li>a {
-    position: relative;
-    display: block;
-    font-size: 2rem;
-    color: $primary-color;
-    line-height: 2;
-    padding: 5px 10px;
-}
-
-ul#main-menu>li.current-menu-item>a {
-    color: $text-color;
-}
-
-ul#main-menu>li>a:focus,
-ul#main-menu>li>a:hover {
-    text-decoration: none;
-    color: $text-color;
-}
-
-/** Sub Menu  ***/
-ul#main-menu ul.sub-menu {
-    position: absolute;
-    z-index: 10;
-    left: -15px;
-    top: 100%;
-    width: 250px;
-    display: none;
-}
-
-ul#main-menu>li.menu-item-has-children:hover>ul.sub-menu {
-    display: block;
-}
-
-ul#main-menu ul.sub-menu li {
-    position: relative;
-    display: block;
-    background: #fff;
-}
-
-ul#main-menu ul.sub-menu li a {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px;
-    color: $primary-color;
-    margin-right: 2px;
-    margin-left: 2px;
-}
-
-ul#main-menu ul.sub-menu li a:hover,
-ul#main-menu ul.sub-menu li a:focus {
-    text-decoration: none;
-    color: $text-color;
-}
-
-ul#main-menu ul.sub-menu li:hover>a {
-    color: $text-color;
-}
-
-/****** General ******/
+/*============================== General =========================*/
 .bold{
     font-weight: bold;
 }
@@ -245,51 +223,7 @@ ul#main-menu ul.sub-menu li:hover>a {
 .white{
     color: #fff;
 }
-.full-absolute{
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-}
-.bg-image{
-    background-position: center;
-    background-size: cover;
-}
-.page-template-accessibility{
-    direction: rtl;
-     a.accessibility {
-     margin-top: 5px;
-     display: block;
-   }
-    .main-container{
-        padding: 70px 15px;
-    }
-    h1{
-        text-align: center;
-    }
-    h2{
-        font-size: 2rem;
-        margin-top: 50px;
-        text-align: right;
-    }
-    p{
-        text-align: right !important;
-        line-height: 1.4;
-    }
-    .content ul{
-        direction: rtl;
-        list-style: disc;
-        p{
-            text-align: right;
-        }
-        li{
-            font-size: 0.9rem;
-            text-align: right;
-            margin-bottom: 10px;
-        }
-    }
-}
+
 
 /* fixes potential theme css conflict */
 .acf-map img {
