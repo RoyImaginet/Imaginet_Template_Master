@@ -115,8 +115,7 @@ ul#mobile-menu {
         a {
             position: relative;
             display: block;
-            font-size: 1rem;
-            font-size: 0.9rem;
+            font-size: 1.8rem;
             text-decoration: none;
             padding: 10px 15px;
             color: $text-color;
@@ -133,14 +132,6 @@ ul#mobile-menu {
             a {
                 padding: 0px 15px 10px 15px;
                 font-size: 1.6rem;
-                &:before{
-                    position: absolute;
-                    display: block;
-                    left: 0;
-                    top: 0px;
-                    content: '>>';
-                    font-size: 0.7rem;
-                }
             }
         }
     }
