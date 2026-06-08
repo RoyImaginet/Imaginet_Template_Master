@@ -1,4 +1,4 @@
-$(function () {
+jQuery(document).ready(function($) {
     var headerHeight = $('header').outerHeight();
     var footerHeight = $('footer').outerHeight();
     if ($('#wpadminbar').length) {
@@ -16,16 +16,15 @@ $(function () {
         $img.attr('title', filename);
     });
     /*======================== Mobile menu =========================*/
-    $('.mobile_menu_button .triggerMobileMenu').click(function () {
-        $(this).toggleClass('open');
-        var targetID = $(this).data('toggle');
-        $('#' + targetID).toggleClass('is-open');
-        $(this).find('.tab').toggleClass('active');
-        $('body').toggleClass('has-overflow');
-    });
-    $('ul#mobile-menu li a').click(function(){
-        $('body').toggleClass('has-overflow');
-        $('.off-canvas').toggleClass('is-open');
+    $('.menu-toggle').on('click', function() {
+        var $nav = $('.site-navigation');
+        var $toggle = $(this);
+
+        var isOpen = $nav.hasClass('is-open');
+
+        $nav.toggleClass('is-open');
+
+        $toggle.attr('aria-expanded', !isOpen);
     });
 
     
