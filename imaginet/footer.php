@@ -1,4 +1,3 @@
-		</main>
 		<footer class="footer" role="contentinfo" id="colophon">
 			<div class="container">
 				<div class="rights-credit">
