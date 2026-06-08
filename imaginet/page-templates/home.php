@@ -1,6 +1,22 @@
-<?php //Template Name: Home?>
-<?php get_header()?>
-<main class="page-wrap homepage">
-  Hello from home
+<?php
+/**
+ * Template Name: Home Page Layout
+ *
+ * This is the template that displays the homepage layout.
+ */
+
+get_header(); ?>
+
+<main id="primary-content" <?php post_class('page-wrap homepage-wrapper'); ?>>
+    
+    <?php if ( have_posts() ) : ?>
+        <?php while ( have_posts() ) : the_post(); ?>
+
+            <?php the_content(); ?>
+
+        <?php endwhile; ?>
+    <?php endif; ?>
+        
 </main>
-<?php get_footer()?>
+
+<?php get_footer(); ?>
