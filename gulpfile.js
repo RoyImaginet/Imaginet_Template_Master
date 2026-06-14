@@ -1,13 +1,14 @@
 const gulp = require('gulp');
 const { series, parallel, watch } = require('gulp');
 const fs = require('fs');
+const pkg = require('./package.json'); // Dynamically read package metadata
 
 // Core Compilation Modules
 const concat = require('gulp-concat');
 const plumber = require('gulp-plumber');
 const uglify = require('gulp-uglify');
 const cleanCSS = require('gulp-clean-css');
-const sass = require('gulp-sass')(require('sass')); // Modern Compiler Hook
+const sass = require('gulp-sass')(require('sass')); // Modern Dart-Sass Compiler Hook
 const sourcemaps = require('gulp-sourcemaps');
 const autoprefixer = require('gulp-autoprefixer');
 const gap = require('gulp-append-prepend');
@@ -18,7 +19,8 @@ const assetsBase = './wordpress/wp-content/themes/imaginet/assets';
 const templateDir = './wordpress/wp-content/themes/imaginet';
 const cleanUpDirs = ['./downloads/', './imaginet', './wordpress/wp-content/themes/twenty*'];
 
-const cssHeader = `/*\n\tTheme Name: Imaginet Starter Template\n\tVersion: 2.01\n\tAuthor: Imaginet Studio\n*/`;
+// Dynamically matches your theme version to your package.json version string
+const cssHeader = `/*\n\tTheme Name: Imaginet Starter Template\n\tVersion: ${pkg.version}\n\tAuthor: Imaginet Studio\n*/`;
 
 // ==========================================================================
 // 1. Core Production Asset Compilation Tasks
@@ -38,9 +40,9 @@ function compileSass() {
 		.pipe(gulp.dest(templateDir));
 }
 
-// Combine Framework CSS Libraries
+// Combine Framework CSS Libraries directly from node_modules
 function bundleVendorCss() {
-	const coreCssResources = [`${assetsBase}/bootstrap/css/bootstrap.min.css`];
+	const coreCssResources = ['./node_modules/bootstrap/dist/css/bootstrap.min.css'];
 	return gulp
 		.src(coreCssResources, { allowEmpty: true })
 		.pipe(concat('vendor-styles.css'))
@@ -63,27 +65,27 @@ function cleanMaps(cb) {
 function downloadWP(cb) {
 	if (!fs.existsSync('./downloads/latest.zip')) {
 		const download = require('gulp-download-files');
-		download('https://wordpress.org/latest.zip')
-			.pipe(gulp.dest('./downloads/'))
-			.on('finish', cb);
-		return;
+		return download('https://wordpress.org/latest.zip')
+			.pipe(gulp.dest('./downloads/'));
 	}
 	cb();
 }
 
-function unzipWP(cb) {
+function unzipWP() {
 	const unzip = require('gulp-unzip');
-	gulp.src('./downloads/latest.zip').pipe(unzip()).pipe(gulp.dest('./')).on('finish', cb);
+	return gulp.src('./downloads/latest.zip')
+		.pipe(unzip())
+		.pipe(gulp.dest('./'));
 }
 
-function setStarterTemplateInWpContent(cb) {
-	gulp.src('./imaginet/**')
-		.pipe(gulp.dest('./wordpress/wp-content/themes/imaginet'))
-		.on('finish', cb);
+function setStarterTemplateInWpContent() {
+	return gulp.src('./imaginet/**')
+		.pipe(gulp.dest('./wordpress/wp-content/themes/imaginet'));
 }
 
-function cleanGarbage(cb) {
-	return gulp.src(cleanUpDirs, { read: false, allowEmpty: true }).pipe(clean({ force: true }));
+function cleanGarbage() {
+	return gulp.src(cleanUpDirs, { read: false, allowEmpty: true })
+		.pipe(clean({ force: true }));
 }
 
 function createUploadsHtaccess(cb) {
@@ -110,6 +112,7 @@ const setupWorkspace = series(
 	setStarterTemplateInWpContent,
 	parallel(compileSass, bundleVendorCss),
 	cleanGarbage,
+	cleanMaps,
 	createUploadsHtaccess,
 	(cb) => {
 		console.log('\x1b[32m%s\x1b[0m', '► Core Workspace successfully generated! Run "gulp" to develop.');
