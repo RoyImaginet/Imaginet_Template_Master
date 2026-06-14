@@ -85,6 +85,59 @@ add_filter( 'the_generator', 'remove_wp_version' );
 //============== Disable  xmlrpc ===========
 add_filter( 'xmlrpc_enabled', '__return_false' );
 
+//===== Completely disable comments on media/attachments. =============
+function imaginet_close_comments_on_new_uploads( $data ) {
+    if ( isset( $data['post_type'] ) && 'attachment' === $data['post_type'] ) {
+        $data['comment_status'] = 'closed';
+        $data['ping_status']    = 'closed'; // Closes trackbacks/pings too
+    }
+    return $data;
+}
+add_filter( 'wp_insert_post_data', 'imaginet_close_comments_on_new_uploads' );
+
+function imaginet_force_close_existing_media_comments( $open, $post_id ) {
+    $post = get_post( $post_id );
+    if ( $post && 'attachment' === $post->post_type ) {
+        return false;
+    }
+    return $open;
+}
+add_filter( 'comments_open', 'imaginet_force_close_existing_media_comments', 10, 2 );
+
+add_action( 'template_redirect', function() {
+    if ( is_attachment() ) {
+        add_filter( 'comments_template', '__return_false', 99 );
+    }
+});
+//============= Block the activation and installation of known file managers and IDE plugins. ===============
+ */
+function imaginet_blacklist_file_managers( $plugin, $redirect = false ) {
+	// List of known file manager / IDE plugin main file paths
+	$blacklist = array(
+		'wp-file-manager/wp-file-manager.php',
+		'advanced-file-manager/wp-file-manager.php',
+		'file-manager-advanced/file-manager-advanced.php',
+		'wpide/wpide.php',
+		'real-media-library/index.php',
+		'filester/filester.php',
+	);
+
+	if ( in_array( $plugin, $blacklist, true ) ) {
+		deactivate_plugins( $plugin );
+		
+		wp_die( 
+			__( 'Security Restriction: File Manager and IDE plugins are strictly prohibited on this installation.', 'imaginet' ), 
+			__( 'Plugin Blocked', 'imaginet' ), 
+			array( 'back_link' => true ) 
+		);
+	}
+}
+add_action( 'activate_plugin', 'imaginet_blacklist_file_managers', 10, 1 );
+add_action( 'activated_plugin', 'imaginet_blacklist_file_managers', 10, 1 );
+
+
+
+
 //============== Register menus ===========
 register_nav_menus(array( // Using array to specify more menus if needed
     'main-menu' => __('Main Menu', 'imaginet'), // Main Navigation
