@@ -6,12 +6,12 @@
 /* Defaults
 -------------------------------------------------------------- */
 html {
-    font-size: 10px;
+    font-size: 20px;
 }
 
 body {
     color: $text-color;
-    font-size: 2rem;
+    font-size: 1rem;
     direction: ltr;
     line-height: 1.5;
     font-weight: 400;
@@ -34,19 +34,19 @@ h6 {
 }
 
 h1 {
-    font-size: 5rem;
-}
-
-h2 {
     font-size: 4rem;
 }
 
-h3 {
+h2 {
     font-size: 3rem;
 }
 
-h4 {
+h3 {
     font-size: 2rem;
+}
+
+h4 {
+    font-size: 1rem;
 }
 
 div,
@@ -111,7 +111,7 @@ img.grayscale:hover {
 
 .content ol,
 .content ul {
-    font-size: 2rem;
+    font-size: 1rem;
     line-height: 1.5;
     margin-bottom: 8px;
 }
@@ -121,9 +121,9 @@ img.grayscale:hover {
 }
 
 .content p {
-    font-size: 2rem;
+    font-size: 1rem;
     line-height: 1.5;
-    margin-bottom: 1rem;
+    margin-bottom: .5rem;
 }
 
 /****************************************************************
@@ -160,7 +160,7 @@ ul#main-menu {
         >a {
             position: relative;
             display: block;
-            font-size: 2rem;
+            font-size: 1rem;
             color: $primary-color;
             line-height: 2;
             padding: 5px 10px;
