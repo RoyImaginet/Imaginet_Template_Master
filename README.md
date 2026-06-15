@@ -1,15 +1,44 @@
-# Imaginet's Starter @2.0.1
+# Imaginet's Starter @3.0
 
 ### Release Notes  
-fixed jQuery deregister bug @1.01
+
+Enhance theme support and security features
 
 added home template @1.02
 
-fixed cascading rules with responsive scss @1.03
+Add theme.json configuration for WordPress theme
 
-added types and taxonomies scss @1.04
+Refactor functions and improve theme support
 
-added wp-content/uploads .htaccess @1.05
+Refactor SCSS styles
+
+Restructor theme layout - removed old off-canvas layout
+
+Update mobile menu styles
+
+js updates
+
+Rename enqueue functions and update styles/scripts
+
+Add taxonomies and REST support to news post type
+
+Enhance WooCommerce theme support settings 
+
+Refactor mobile menu toggle and update event handlers
+
+Add mobile-first styles for main menu drawer
+
+Refactor header.php for improved structure and semantics
+
+Refactor footer structure and accessibility links
+
+Remove redundant header content and fix structure
+
+Revise home.php template for better layout 
+
+Update package.json with new dependencies and URLs
+
+Refactor gulpfile.js for improved structure and tasks
 
 ## Welcome,
 
