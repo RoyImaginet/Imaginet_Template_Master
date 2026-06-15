@@ -59,41 +59,40 @@ function cleanMaps(cb) {
 }
 
 // ==========================================================================
-// 2. Automated Workspace Downloader & Provision Engine
+// 2. Automated Workspace Downloader & Provision Engine (Modernized)
 // ==========================================================================
+const axios = require('axios');
+const AdmZip = require('adm-zip');
 
-function downloadWP(cb) {
+async function downloadWP() {
 	if (!fs.existsSync('./downloads/latest.zip')) {
-		const download = require('gulp-download-files');
-		return download('https://wordpress.org/latest.zip')
-			.pipe(gulp.dest('./downloads/'));
+		// Ensure downloads folder exists
+		if (!fs.existsSync('./downloads')) fs.mkdirSync('./downloads');
+		
+		const response = await axios({
+			url: 'https://wordpress.org/latest.zip',
+			method: 'GET',
+			responseType: 'stream'
+		});
+		
+		const writer = fs.createWriteStream('./downloads/latest.zip');
+		response.data.pipe(writer);
+		
+		return new Promise((resolve, reject) => {
+			writer.on('finish', resolve);
+			writer.on('error', reject);
+		});
 	}
-	cb();
 }
 
-function unzipWP() {
-	const unzip = require('gulp-unzip');
-	return gulp.src('./downloads/latest.zip')
-		.pipe(unzip())
-		.pipe(gulp.dest('./'));
-}
-
-function setStarterTemplateInWpContent() {
-	return gulp.src('./imaginet/**')
-		.pipe(gulp.dest('./wordpress/wp-content/themes/imaginet'));
-}
-
-function cleanGarbage() {
-	return gulp.src(cleanUpDirs, { read: false, allowEmpty: true })
-		.pipe(clean({ force: true }));
-}
-
-function createUploadsHtaccess(cb) {
-	const htaccessPath = './wordpress/wp-content/uploads';
-	if (!fs.existsSync(htaccessPath)) {
-		fs.mkdirSync(htaccessPath, { recursive: true });
+function unzipWP(cb) {
+	try {
+		const zip = new AdmZip('./downloads/latest.zip');
+		zip.extractAllTo('./', true); // Extracts to root, creating /wordpress
+		cb();
+	} catch (err) {
+		cb(err);
 	}
-	fs.writeFile(`${htaccessPath}/.htaccess`, 'Options -Indexes', cb);
 }
 
 // ==========================================================================
