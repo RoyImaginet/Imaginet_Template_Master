@@ -135,7 +135,13 @@ function imaginet_blacklist_file_managers( $plugin, $redirect = false ) {
 add_action( 'activate_plugin', 'imaginet_blacklist_file_managers', 10, 1 );
 add_action( 'activated_plugin', 'imaginet_blacklist_file_managers', 10, 1 );
 
+//============== Check if Advanced Custom Fields is active ================
 
+add_action( 'admin_notices', function() {
+    if ( ! class_exists('ACF') ) {
+        echo '<div class="notice notice-error"><p><strong>Theme Alert:</strong> Advanced Custom Fields is missing. Please activate it.</p></div>';
+    }
+});
 
 
 //============== Register menus ===========
