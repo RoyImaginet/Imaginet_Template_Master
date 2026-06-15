@@ -14,6 +14,10 @@ const autoprefixer = require('gulp-autoprefixer');
 const gap = require('gulp-append-prepend');
 const clean = require('gulp-clean');
 
+// Modern Download Engine Dependencies
+const axios = require('axios');
+const AdmZip = require('adm-zip');
+
 // Path Map Definitions
 const assetsBase = './wordpress/wp-content/themes/imaginet/assets';
 const templateDir = './wordpress/wp-content/themes/imaginet';
@@ -59,15 +63,14 @@ function cleanMaps(cb) {
 }
 
 // ==========================================================================
-// 2. Automated Workspace Downloader & Provision Engine (Modernized)
+// 2. Automated Workspace Downloader & Provision Engine
 // ==========================================================================
-const axios = require('axios');
-const AdmZip = require('adm-zip');
 
 async function downloadWP() {
 	if (!fs.existsSync('./downloads/latest.zip')) {
-		// Ensure downloads folder exists
-		if (!fs.existsSync('./downloads')) fs.mkdirSync('./downloads');
+		if (!fs.existsSync('./downloads')) {
+			fs.mkdirSync('./downloads', { recursive: true });
+		}
 		
 		const response = await axios({
 			url: 'https://wordpress.org/latest.zip',
@@ -88,11 +91,30 @@ async function downloadWP() {
 function unzipWP(cb) {
 	try {
 		const zip = new AdmZip('./downloads/latest.zip');
-		zip.extractAllTo('./', true); // Extracts to root, creating /wordpress
+		zip.extractAllTo('./', true); 
 		cb();
 	} catch (err) {
 		cb(err);
 	}
+}
+
+function setStarterTemplateInWpContent() {
+	return gulp.src('./imaginet/**')
+		.pipe(gulp.dest('./wordpress/wp-content/themes/imaginet'));
+}
+
+function cleanGarbage() {
+	return gulp.src(cleanUpDirs, { read: false, allowEmpty: true })
+		.pipe(clean({ force: true }));
+}
+
+// Fixed task structure using native FS instead of old tools
+function createUploadsHtaccess(cb) {
+	const htaccessPath = './wordpress/wp-content/uploads';
+	if (!fs.existsSync(htaccessPath)) {
+		fs.mkdirSync(htaccessPath, { recursive: true });
+	}
+	fs.writeFile(`${htaccessPath}/.htaccess`, 'Options -Indexes', cb);
 }
 
 // ==========================================================================
@@ -100,7 +122,6 @@ function unzipWP(cb) {
 // ==========================================================================
 
 function watchFiles() {
-	// Recompile SCSS instantly whenever style changes are detected
 	watch(`${assetsBase}/scss/**/*.scss`, compileSass);
 }
 
