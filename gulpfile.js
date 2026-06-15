@@ -143,5 +143,6 @@ const setupWorkspace = series(
 
 // Module Exports mapping directly to package.json scripts
 exports.setup = setupWorkspace;
+exports.init = setupWorkspace; 
 exports.compile = parallel(compileSass, bundleVendorCss);
 exports.default = series(parallel(compileSass, bundleVendorCss), watchFiles);
