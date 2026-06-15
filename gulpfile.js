@@ -37,7 +37,7 @@ function compileSass() {
 		.pipe(plumber())
 		.pipe(sourcemaps.init())
 		.pipe(sass({ outputStyle: 'expanded' }).on('error', sass.logError))
-		.pipe(autoprefixer())
+		.pipe(autoprefixer({ cascade: false })) // Added fallback configuration object
 		.pipe(cleanCSS())
 		.pipe(gap.prependText(cssHeader))
 		.pipe(sourcemaps.write('.'))

@@ -24,6 +24,8 @@
 	},
 	"homepage": "https://github.com/RoyImaginet/starter_template#readme",
 	"devDependencies": {
+		"adm-zip": "^0.5.17",
+		"axios": "^1.18.0",
 		"colors": "^1.4.0",
 		"gulp": "^4.0.2",
 		"gulp-append-prepend": "^1.0.8",
