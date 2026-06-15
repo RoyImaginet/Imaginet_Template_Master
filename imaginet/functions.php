@@ -254,22 +254,6 @@ add_filter( 'tiny_mce_before_init', 'my_theme_acf_wysiwyg_colors' );
 
 
 /**
- * Automatically convert Hebrew file names to clean URL-safe text during upload.
- */
-function my_theme_sanitize_hebrew_filenames( $filename ) {
-    // Convert Hebrew characters to their phonetic Latin equivalents (Transliteration)
-    // E.g., "תמונה" becomes "tmvnh" or safely url-encoded
-    $sanitized = remove_accents( $filename );
-
-    // Strip out any remaining illegal characters, spaces, or symbols
-    $sanitized = sanitize_file_name( $sanitized );
-
-    return $sanitized;
-}
-add_filter( 'sanitize_file_name', 'my_theme_sanitize_hebrew_filenames', 10 );
-
-
-/**
  * Securely log PHP data to the private wp-content/debug.log file
  */
 function imaginet_theme_log( $data ) {
