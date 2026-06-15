@@ -110,7 +110,7 @@ add_action( 'template_redirect', function() {
     }
 });
 //============= Block the activation and installation of known file managers and IDE plugins. ===============
- */
+ 
 function imaginet_blacklist_file_managers( $plugin, $redirect = false ) {
 	// List of known file manager / IDE plugin main file paths
 	$blacklist = array(
