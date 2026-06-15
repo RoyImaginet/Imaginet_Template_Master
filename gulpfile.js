@@ -10,7 +10,8 @@ const uglify = require('gulp-uglify');
 const cleanCSS = require('gulp-clean-css');
 const sass = require('gulp-sass')(require('sass')); // Modern Dart-Sass Compiler Hook
 const sourcemaps = require('gulp-sourcemaps');
-const autoprefixer = require('gulp-autoprefixer');
+const postcss = require('gulp-postcss');
+const autoprefixer = require('autoprefixer');
 const gap = require('gulp-append-prepend');
 const clean = require('gulp-clean');
 
@@ -32,16 +33,16 @@ const cssHeader = `/*\n\tTheme Name: Imaginet Starter Template\n\tVersion: ${pkg
 
 // Compile Custom SCSS into Theme Directory
 function compileSass() {
-	return gulp
-		.src(`${assetsBase}/scss/**/*.scss`)
-		.pipe(plumber())
-		.pipe(sourcemaps.init())
-		.pipe(sass({ outputStyle: 'expanded' }).on('error', sass.logError))
-		.pipe(autoprefixer({ cascade: false })) // Added fallback configuration object
-		.pipe(cleanCSS())
-		.pipe(gap.prependText(cssHeader))
-		.pipe(sourcemaps.write('.'))
-		.pipe(gulp.dest(templateDir));
+    return gulp
+        .src(`${assetsBase}/scss/**/*.scss`)
+        .pipe(plumber())
+        .pipe(sourcemaps.init())
+        .pipe(sass({ outputStyle: 'expanded' }).on('error', sass.logError))
+        .pipe(postcss([ autoprefixer() ])) // Updated to use the PostCSS array runner
+        .pipe(cleanCSS())
+        .pipe(gap.prependText(cssHeader))
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(templateDir));
 }
 
 // Combine Framework CSS Libraries directly from node_modules
