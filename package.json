@@ -43,8 +43,7 @@
 		"gulp-uglify": "^3.0.2",
 		"gulp-unzip": "^1.1.0",
 		"inquirer": "^8.2.5",
-		"sass": "^1.70.0",
-		"zip-lib": "^0.5.2"
+		"sass": "^1.70.0"
 	},
 	"dependencies": {
 		"bootstrap": "latest",
