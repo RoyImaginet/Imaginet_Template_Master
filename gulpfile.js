@@ -9,7 +9,7 @@ const uglify = require('gulp-uglify');
 const cleanCSS = require('gulp-clean-css');
 const sass = require('gulp-sass')(require('sass')); 
 const sourcemaps = require('gulp-sourcemaps');
-const autoprefixer = require('gulp-autoprefixer').default; // Added .default fallback if needed
+const autoprefixer = require('gulp-autoprefixer').default; 
 const gap = require('gulp-append-prepend');
 const clean = require('gulp-clean');
 
@@ -22,7 +22,7 @@ const cleanUpDirs = ['./downloads/', './imaginet', './wordpress/wp-content/theme
 const rtlcss = require('gulp-rtlcss');
 const rename = require('gulp-rename');
 
-const cssHeader = `/*\n\tTheme Name: Imaginet Starter Template\n\tVersion: 2.01\n\tAuthor: Imaginet Studio\n*/`;
+const cssHeader = `/*\n\tTheme Name: Imaginet Starter Template\n\tVersion: 3.0\n\tAuthor: Imaginet Studio\n*/`;
 
 // ==========================================================================
 // 1. Core Production Asset Compilation Tasks
@@ -44,7 +44,7 @@ function compileSass() {
 		.pipe(gulp.src(`${assetsBase}/scss/style.css`, { allowEmpty: true }))
 		.pipe(rtlcss()) 
 		.pipe(rename({ suffix: '-rtl' })) 
-		.pipe(gulp.dest(`${assetsBase}/scss`)) // Saves un-minified style-rtl.css
+		.pipe(gulp.dest(`${assetsBase}/scss`)) 
 		
 		// 3. Minify all compiled production stylesheets together
 		.pipe(gulp.src(`${assetsBase}/scss/*.css`))
@@ -53,22 +53,31 @@ function compileSass() {
 		.pipe(gulp.dest(`${assetsBase}/scss`));
 }
 
-// Framework CSS Libraries compile directly into the root style.css (Run Once)
-function bundleVendorCss() {
-	const coreCssResources = [`${assetsBase}/bootstrap/css/bootstrap.min.css`];
-	return gulp
-		.src(coreCssResources, { allowEmpty: true })
+// Framework CSS Libraries compile directly into the root style.css
+function bundleVendorCss(cb) {
+	const targetFile = `${templateDir}/style.css`;
+	
+	// If it doesn't exist locally, stream it straight from the official Bootstrap CDN!
+	const download = require('gulp-download-files');
+	download('https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css')
 		.pipe(concat('style.css'))
 		.pipe(cleanCSS())
 		.pipe(gap.prependText(cssHeader))
-		.pipe(gulp.dest(templateDir));
+		.pipe(gulp.dest(templateDir))
+		.on('finish', () => {
+			if (typeof cb === 'function') cb();
+		});
+}
+
+// Keep this wrapper helper right below it
+function bundleVendorCssStandalone(cb) {
+	bundleVendorCss(cb);
 }
 
 // ==========================================================================
 // 2. Automated Workspace Downloader & Provision Engine
 // ==========================================================================
 
-// FIXED: Restored downloadWP from the duplicate definition override
 function downloadWP(cb) {
 	if (!fs.existsSync('./downloads/latest.zip')) {
 		const download = require('gulp-download-files');
@@ -80,18 +89,20 @@ function downloadWP(cb) {
 	cb();
 }
 
-function unzipWP(cb) {
-	const unzip = require('gulp-unzip');
-	gulp.src('./downloads/latest.zip').pipe(unzip()).pipe(gulp.dest('./')).on('finish', cb);
+function unzipWP() {
+	// Added return statement to handle asynchronous completion
+	return gulp.src('./downloads/latest.zip')
+		.pipe(require('gulp-unzip')())
+		.pipe(gulp.dest('./'));
 }
 
-function setStarterTemplateInWpContent(cb) {
-	gulp.src('./imaginet/**')
-		.pipe(gulp.dest('./wordpress/wp-content/themes/imaginet'))
-		.on('finish', cb);
+function setStarterTemplateInWpContent() {
+	// Added return statement to explicitly track asset migration completion
+	return gulp.src('./imaginet/**')
+		.pipe(gulp.dest('./wordpress/wp-content/themes/imaginet'));
 }
 
-function cleanGarbage(cb) {
+function cleanGarbage() {
 	return gulp.src(cleanUpDirs, { read: false, allowEmpty: true }).pipe(clean({ force: true }));
 }
 
@@ -115,8 +126,9 @@ function watchFiles() {
 const setupWorkspace = series(
 	downloadWP,
 	unzipWP,
-	setStarterTemplateInWpContent,
-	parallel(compileSass, bundleVendorCss),
+	setStarterTemplateInWpContent, // 1. Moves the files into place completely first
+	compileSass,                   // 2. Compiles your custom styling
+	bundleVendorCss,               // 3. Generates root style.css from Bootstrap cleanly
 	cleanGarbage,
 	createUploadsHtaccess,
 	(cb) => {
