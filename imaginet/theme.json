@@ -3,6 +3,9 @@
 	"version": 3,
 	"settings": {
 		"appearanceTools": true,
+		"site-editor": {
+			"favicon": "file:./assets/img/favi.png"
+		},
 		"layout": {
 			"contentSize": "720px",
 			"wideSize": "1200px"

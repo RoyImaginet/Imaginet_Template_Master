@@ -4,15 +4,18 @@ function imaginet_enqueue_styles()
 {
     wp_enqueue_style(
         'style',
-        THEME . '/style.css',
+        get_template_directory_uri() . '/style.css',
         array(), 
         time(),
         'all'    
     );
+
+    $custom_style_path = is_rtl() ? '/assets/scss/style-rtl.css' : '/assets/scss/style.css';
+
     wp_enqueue_style(
-        'style',
-        THEME . '/assets/css/style.css',
-        array(), 
+        'scss',
+        get_template_directory_uri() . $custom_style_path,
+        array('style'), 
         time(),
         'all'    
     );

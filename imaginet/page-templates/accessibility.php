@@ -1,7 +1,7 @@
 <?php //Template Name: Accessiblity  ?>
 
 <?php get_header(); ?>
-<main>
+<main id="primary-content">
     <section id="hero">
         <div class="container">
             <h1>

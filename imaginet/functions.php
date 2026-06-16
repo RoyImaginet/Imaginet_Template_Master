@@ -1,5 +1,4 @@
 <?php
-
 /*****************************************
  **  Languages
  *****************************************/
@@ -74,6 +73,21 @@ if (function_exists('add_theme_support')) {
         'link' 
     ) );
 }
+
+/**
+ * Force Default Site Icon from theme.json / Assets
+ */
+
+add_action( 'wp_head', 'imaginet_render_json_favicon', 1 );
+add_action( 'admin_head', 'imaginet_render_json_favicon' );
+add_action( 'login_head', 'imaginet_render_json_favicon' );
+function imaginet_render_json_favicon() {
+    if ( ! get_option( 'site_icon' ) ) {
+        $favicon_url = get_template_directory_uri() . '/assets/img/favi.png';
+        echo '<link rel="icon" href="' . esc_url( $favicon_url ) . '" sizes="32x32" />';
+        echo '<link rel="icon" href="' . esc_url( $favicon_url ) . '" sizes="192x192" />';
+    }
+}
 /*****************************************
  **  Security
  *****************************************/
@@ -82,8 +96,18 @@ function remove_wp_version() {
     return '';
 }
 add_filter( 'the_generator', 'remove_wp_version' );
+
 //============== Disable  xmlrpc ===========
 add_filter( 'xmlrpc_enabled', '__return_false' );
+
+//============== Disable Dashboard File Editors =============
+add_action( 'init', 'my_theme_enforce_file_editor_lockdown' );
+
+function my_theme_enforce_file_editor_lockdown() {
+    if ( ! defined( 'DISALLOW_FILE_EDIT' ) ) {
+        define( 'DISALLOW_FILE_EDIT', true );
+    }
+}
 
 //===== Completely disable comments on media/attachments. =============
 function imaginet_close_comments_on_new_uploads( $data ) {
@@ -110,7 +134,6 @@ add_action( 'template_redirect', function() {
     }
 });
 //============= Block the activation and installation of known file managers and IDE plugins. ===============
- 
 function imaginet_blacklist_file_managers( $plugin, $redirect = false ) {
 	// List of known file manager / IDE plugin main file paths
 	$blacklist = array(
@@ -134,6 +157,7 @@ function imaginet_blacklist_file_managers( $plugin, $redirect = false ) {
 }
 add_action( 'activate_plugin', 'imaginet_blacklist_file_managers', 10, 1 );
 add_action( 'activated_plugin', 'imaginet_blacklist_file_managers', 10, 1 );
+
 
 //============== Check if Advanced Custom Fields is active ================
 

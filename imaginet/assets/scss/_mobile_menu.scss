@@ -3,49 +3,55 @@
    ========================================================================== */
 @media (max-width: 991px) {
     
-    /* Turn the drawer container into a fixed sidebar layout */
-    .main-menu-drawer {
-        position: fixed;
-        top: 0;
-        right: 0;
-        width: 300px; /* Width of your mobile menu drawer */
-        height: 100vh;
-        background-color: #1a1a1a; /* Dark theme drawer style */
-        padding: 100px 30px 40px;
-        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
-        z-index: 9999;
-        
-        transform: translateX(100%);
-        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+    
 
-    .site-navigation.is-open .main-menu-drawer {
-        transform: translateX(0);
-    }
-
-    .menu-items-list {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        a {
-            color: #ffffff;
-            font-size: 1rem;
-            text-decoration: none;
+    .site-navigation {
+        .main-menu-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100vw; /* Width of your mobile menu drawer */
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1a1a1a; 
+            padding: 100px 30px 40px;
+            z-index: 9999;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        &.is-open {
+            .main-menu-drawer {
+                transform: translateX(0);
+            }
+        }
+        .menu-items-list {
+            flex-direction: column !important;
+            gap: 20px;
+            padding: 0;
+            margin: 0;
+            a {
+                color: white !important;
+                text-align: center;
+            }
+            li.current-menu-item > a {
+                color: $primary-color !important;
+            }
+        }
+        .menu-toggle {
+            position: relative;
+            z-index: 10000;
             display: block;
+            background: none;
+            border: none;
+            cursor: pointer;
         }
     }
 
-    .menu-toggle {
-        position: relative;
-        z-index: 10000;
-        display: block;
-        background: none;
-        border: none;
-        cursor: pointer;
-    }
+    
+
+    
 }
 
 /* ==========================================================================
@@ -89,7 +95,7 @@
 .triggerMobileMenu{
     position: relative;
     width: 40px;
-    height: 28px;
+    height: 40px;
     padding: 0;
     border: 0;
     margin: 0 auto;
@@ -98,7 +104,8 @@
     cursor: pointer;
     background: none;
     text-indent: -99999px;
-    span {
+
+    span.hamburger-bar {
         display: block;
         position: absolute;
         height: 5px;
@@ -109,28 +116,28 @@
         left: 0;
         transform: rotate(0deg);
         transition: .25s ease-in-out;
-        &:nth-child(1) {
-            top: 0px;
-        }
         &:nth-child(2) {
-            top: 11px;
+            top: 5px;
         }
         &:nth-child(3) {
-            top: 22px;
+            top: 16px;
+        }
+        &:nth-child(4) {
+            top: 27px;
         }
     }
     &.open {
-        span {
-            &:nth-child(1) {
-                top: 11px;
+        span.hamburger-bar {
+            &:nth-child(2) {
+                top: 16px;
                 transform: rotate(135deg);
             }
-            &:nth-child(2) {
+            &:nth-child(3) {
                 opacity: 0;
                 left: -60px;
             }
-            &:nth-child(3) {
-                top: 11px;
+            &:nth-child(4) {
+                top: 16px;
                 transform: rotate(-135deg);
             }
         }

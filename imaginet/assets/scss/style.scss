@@ -129,10 +129,6 @@ img.grayscale:hover {
 /****************************************************************
     LAYOUT  LAYOUT  LAYOUT  LAYOUT  LAYOUT  LAYOUT  LAYOUT  LAYOUT
 ****************************************************************/
-.off-canvas-wrapper {
-    position: relative;
-    overflow: hidden;
-}
 
 .container {
     max-width: 1200px;
@@ -141,12 +137,31 @@ img.grayscale:hover {
     position: relative;
     display: block;
 }
+.site-logo {
+    min-width: 150px;
+    a {
+        display: block;
+        width: 100%;
+    }
+}
+.skip-link {
+    position: absolute;
+    top: -1000px;
+    left: -1000px;
+    background: #000;
+    color: #fff;
+    padding: 10px 20px;
+    z-index: 99999;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 0 0 5px 5px;
+    transition: top 0.2s ease;
+}
 
-.flex_container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.skip-link:focus {
+    top: 0;
+    left: 20px; 
+    outline: 2px solid #ffcc00; 
 }
 
 /*============================== Main Menu =========================*/

@@ -1,115 +1,100 @@
 const gulp = require('gulp');
 const { series, parallel, watch } = require('gulp');
 const fs = require('fs');
-const pkg = require('./package.json'); // Dynamically read package metadata
 
 // Core Compilation Modules
 const concat = require('gulp-concat');
 const plumber = require('gulp-plumber');
 const uglify = require('gulp-uglify');
 const cleanCSS = require('gulp-clean-css');
-const sass = require('gulp-sass')(require('sass')); // Modern Dart-Sass Compiler Hook
+const sass = require('gulp-sass')(require('sass')); 
 const sourcemaps = require('gulp-sourcemaps');
-const postcss = require('gulp-postcss');
-const autoprefixer = require('autoprefixer');
+const autoprefixer = require('gulp-autoprefixer');
 const gap = require('gulp-append-prepend');
 const clean = require('gulp-clean');
-
-// Modern Download Engine Dependencies
-const axios = require('axios');
-const AdmZip = require('adm-zip');
 
 // Path Map Definitions
 const assetsBase = './wordpress/wp-content/themes/imaginet/assets';
 const templateDir = './wordpress/wp-content/themes/imaginet';
 const cleanUpDirs = ['./downloads/', './imaginet', './wordpress/wp-content/themes/twenty*'];
 
-// Dynamically matches your theme version to your package.json version string
-const cssHeader = `/*\n\tTheme Name: Imaginet Starter Template\n\tVersion: ${pkg.version}\n\tAuthor: Imaginet Studio\n*/`;
+// Core Production Asset Compilation Modules
+const rtlcss = require('gulp-rtlcss');
+const rename = require('gulp-rename');
+
+const cssHeader = `/*\n\tTheme Name: Imaginet Starter Template\n\tVersion: 2.01\n\tAuthor: Imaginet Studio\n*/`;
 
 // ==========================================================================
 // 1. Core Production Asset Compilation Tasks
 // ==========================================================================
 
-// Compile Custom SCSS into Theme Directory
+// 1. Custom SCSS compiles into its own folder (NOT overwriting the root)
 function compileSass() {
-    return gulp
-        .src(`${assetsBase}/scss/**/*.scss`)
-        .pipe(plumber())
-        .pipe(sourcemaps.init())
-        .pipe(sass({ outputStyle: 'expanded' }).on('error', sass.logError))
-        .pipe(postcss([ autoprefixer() ])) // Updated to use the PostCSS array runner
-        .pipe(cleanCSS())
-        .pipe(gap.prependText(cssHeader))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(templateDir));
+	return gulp
+		.src(`${assetsBase}/scss/**/*.scss`)
+		.pipe(plumber())
+		.pipe(sourcemaps.init())
+		.pipe(sass({ outputStyle: 'expanded' }).on('error', sass.logError))
+		.pipe(autoprefixer())
+		.pipe(cleanCSS())
+		.pipe(sourcemaps.write('.'))
+		
+		// 1. Save out your normal custom style.css first
+		.pipe(gulp.dest(`${assetsBase}/scss`)) 
+		
+		// 2. Filter out map files so we only process raw CSS for RTL transformation
+		.pipe(gulp.src(`${assetsBase}/scss/style.css`, { allowEmpty: true }))
+		
+		// 3. Invert directional rules (e.g., margin-left becomes margin-right)
+		.pipe(rtlcss()) 
+		
+		// 4. Rename it so it doesn't overwrite your standard stylesheet
+		.pipe(rename({ suffix: '-rtl' })) 
+		
+		// 5. Save style-rtl.css inside your custom assets folder
+		.pipe(gulp.dest(`${assetsBase}/scss`));
 }
 
-// Combine Framework CSS Libraries directly from node_modules
+// 2. Framework CSS Libraries compile directly into the root style.css (Run Once)
 function bundleVendorCss() {
-	const coreCssResources = ['./node_modules/bootstrap/dist/css/bootstrap.min.css'];
+	const coreCssResources = [`${assetsBase}/bootstrap/css/bootstrap.min.css`];
 	return gulp
 		.src(coreCssResources, { allowEmpty: true })
-		.pipe(concat('vendor-styles.css'))
+		.pipe(concat('style.css')) // ◄ NAMED style.css JUST FOR BOOTSTRAP
 		.pipe(cleanCSS())
-		.pipe(gulp.dest(`${assetsBase}/css`));
-}
-
-// Clean working directory tracking maps
-function cleanMaps(cb) {
-	if (fs.existsSync(`${templateDir}/style.css.map`)) {
-		return gulp.src(`${templateDir}/style.css.map`, { read: false, allowEmpty: true }).pipe(clean({ force: true }));
-	}
-	cb();
+		.pipe(gap.prependText(cssHeader)) // ◄ Put WordPress header on Bootstrap file
+		.pipe(gulp.dest(templateDir));    // ◄ SAVES TO root theme folder
 }
 
 // ==========================================================================
 // 2. Automated Workspace Downloader & Provision Engine
 // ==========================================================================
 
-async function downloadWP() {
-	if (!fs.existsSync('./downloads/latest.zip')) {
-		if (!fs.existsSync('./downloads')) {
-			fs.mkdirSync('./downloads', { recursive: true });
-		}
-		
-		const response = await axios({
-			url: 'https://wordpress.org/latest.zip',
-			method: 'GET',
-			responseType: 'stream'
-		});
-		
-		const writer = fs.createWriteStream('./downloads/latest.zip');
-		response.data.pipe(writer);
-		
-		return new Promise((resolve, reject) => {
-			writer.on('finish', resolve);
-			writer.on('error', reject);
-		});
-	}
+function bundleVendorCss() {
+	const coreCssResources = [`${assetsBase}/bootstrap/css/bootstrap.min.css`];
+	return gulp
+		.src(coreCssResources, { allowEmpty: true })
+		.pipe(concat('style.css'))
+		.pipe(cleanCSS())
+		.pipe(gap.prependText(cssHeader))
+		.pipe(gulp.dest(templateDir));
 }
 
 function unzipWP(cb) {
-	try {
-		const zip = new AdmZip('./downloads/latest.zip');
-		zip.extractAllTo('./', true); 
-		cb();
-	} catch (err) {
-		cb(err);
-	}
+	const unzip = require('gulp-unzip');
+	gulp.src('./downloads/latest.zip').pipe(unzip()).pipe(gulp.dest('./')).on('finish', cb);
 }
 
-function setStarterTemplateInWpContent() {
-	return gulp.src('./imaginet/**')
-		.pipe(gulp.dest('./wordpress/wp-content/themes/imaginet'));
+function setStarterTemplateInWpContent(cb) {
+	gulp.src('./imaginet/**')
+		.pipe(gulp.dest('./wordpress/wp-content/themes/imaginet'))
+		.on('finish', cb);
 }
 
-function cleanGarbage() {
-	return gulp.src(cleanUpDirs, { read: false, allowEmpty: true })
-		.pipe(clean({ force: true }));
+function cleanGarbage(cb) {
+	return gulp.src(cleanUpDirs, { read: false, allowEmpty: true }).pipe(clean({ force: true }));
 }
 
-// Fixed task structure using native FS instead of old tools
 function createUploadsHtaccess(cb) {
 	const htaccessPath = './wordpress/wp-content/uploads';
 	if (!fs.existsSync(htaccessPath)) {
@@ -123,6 +108,7 @@ function createUploadsHtaccess(cb) {
 // ==========================================================================
 
 function watchFiles() {
+	// ONLY watch and re-compile the custom SCSS file while working
 	watch(`${assetsBase}/scss/**/*.scss`, compileSass);
 }
 
@@ -131,9 +117,8 @@ const setupWorkspace = series(
 	downloadWP,
 	unzipWP,
 	setStarterTemplateInWpContent,
-	parallel(compileSass, bundleVendorCss),
+	parallel(compileSass, bundleVendorCss), // Compiles both on setup
 	cleanGarbage,
-	cleanMaps,
 	createUploadsHtaccess,
 	(cb) => {
 		console.log('\x1b[32m%s\x1b[0m', '► Core Workspace successfully generated! Run "gulp" to develop.');
@@ -143,6 +128,6 @@ const setupWorkspace = series(
 
 // Module Exports mapping directly to package.json scripts
 exports.setup = setupWorkspace;
-exports.init = setupWorkspace; 
+exports.init = setupWorkspace;
 exports.compile = parallel(compileSass, bundleVendorCss);
-exports.default = series(parallel(compileSass, bundleVendorCss), watchFiles);
+exports.default = series(compileSass, watchFiles); // Default 'gulp' only runs SCSS, leaves root style.css alone

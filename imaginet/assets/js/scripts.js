@@ -18,11 +18,13 @@ jQuery(document).ready(function($) {
     /*======================== Mobile menu =========================*/
     $('.menu-toggle').on('click', function() {
         var $nav = $('.site-navigation');
+        var $button = $('.triggerMobileMenu');
         var $toggle = $(this);
 
         var isOpen = $nav.hasClass('is-open');
 
         $nav.toggleClass('is-open');
+        $button.toggleClass('open');
 
         $toggle.attr('aria-expanded', !isOpen);
     });

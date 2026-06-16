@@ -14,7 +14,7 @@
 	</a>
 
 	<header class="site-header" id="header">
-	    <div class="flex-container">
+	    <div class="container d-flex justify-content-between">
 	        
 	        <div class="site-logo">
 	            <?php has_custom_logo() ? the_custom_logo() : ''; ?>
