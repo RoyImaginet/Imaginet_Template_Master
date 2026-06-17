@@ -28,17 +28,16 @@ const cssHeader = `/*\n\tTheme Name: Imaginet Starter Template\n\tVersion: 3.0\n
 // 1. Core Production Asset Compilation Tasks
 // ==========================================================================
 
-// Custom SCSS compiles into its own folder AND creates an RTL version automatically
 function compileSass() {
 	return gulp
-		.src(`${assetsBase}/scss/*.scss`) // ◄ Targets all root SCSS files in the folder
+		.src(`${assetsBase}/scss/*.scss`) 
 		.pipe(plumber())
 		.pipe(sourcemaps.init())
 		.pipe(sass({ outputStyle: 'expanded' }).on('error', sass.logError))
 		.pipe(autoprefixer({ cascade: false }))
-		.pipe(cleanCSS()) // Minifies both style.css and style-rtl.css natively
+		.pipe(cleanCSS()) 
 		.pipe(sourcemaps.write('.'))
-		.pipe(gulp.dest(`${assetsBase}/scss`)); // ◄ Outputs both directly into your assets folder
+		.pipe(gulp.dest(`${assetsBase}/scss`)); 
 }
 
 // Framework CSS Libraries compile directly into the root style.css
