@@ -28,7 +28,6 @@
         }
         .menu-items-list {
             flex-direction: column !important;
-            gap: 20px;
             padding: 0;
             margin: 0;
             a {
@@ -46,6 +45,27 @@
             background: none;
             border: none;
             cursor: pointer;
+        }
+        ul#main-menu {
+            ul.sub-menu {
+                position: relative;
+                li {
+                    background: transparent;
+                    text-align: center;
+                    padding: 10px 0;
+                    a {
+                        text-align: center;
+                    }
+                }
+            }
+            li.menu-item-has-children {
+                &:hover {
+                    ul.sub-menu {
+                        display: none;
+                    }
+                }
+            }
+            
         }
     }
 
