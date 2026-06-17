@@ -1,15 +1,5 @@
 jQuery(document).ready(function($) {
-    var headerHeight = $('header').outerHeight();
-    var footerHeight = $('footer').outerHeight();
-    if ($('#wpadminbar').length) {
-        adminBar = $('#wpadminbar').outerHeight();
-    }else{
-        adminBar = 0;
-    }
-    $('#offCanvas').css({
-        'top': 0,
-        'padding-top': headerHeight
-    });
+    
     $('img').each(function () {
         var $img = $(this);
         var filename = $img.attr('alt')
@@ -28,6 +18,18 @@ jQuery(document).ready(function($) {
 
         $toggle.attr('aria-expanded', !isOpen);
     });
+    
+    
+    $('li.menu-item-has-children a').click(function(e) {
+        if ($(window).width() < 991) {
+            if ($(this).closest('ul').hasClass('sub-menu')) {
+                return; 
+            }
+            e.preventDefault();
+            $(this).next('ul.sub-menu').slideToggle();
+        }
+    });
+    
 
     
     $(window).on('resize scroll', function() {
