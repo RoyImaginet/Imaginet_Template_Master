@@ -196,30 +196,27 @@ ul#main-menu {
     ul.sub-menu {
         position: absolute;
         z-index: 10;
-        left: -15px;
         top: 100%;
         width: 250px;
         display: none;
+        padding: 0;
         li {
             position: relative;
             display: block;
             background: #fff;
             a {
                 position: relative;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
                 padding: 10px;
-                color: $primary-color;
+                color: $text-color;
                 margin-right: 2px;
                 margin-left: 2px;
                 &:hover, &:focus {
                    text-decoration: none;
-                    color: $text-color; 
+                    color: $primary-color; 
                 }
             }
             &:hover>a {
-                color: $text-color;
+                color: $primary-color;
             }
         }
     }
