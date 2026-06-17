@@ -31,26 +31,14 @@ const cssHeader = `/*\n\tTheme Name: Imaginet Starter Template\n\tVersion: 3.0\n
 // Custom SCSS compiles into its own folder AND creates an RTL version automatically
 function compileSass() {
 	return gulp
-		.src(`${assetsBase}/scss/**/*.scss`)
+		.src(`${assetsBase}/scss/*.scss`) // ◄ Targets all root SCSS files in the folder
 		.pipe(plumber())
 		.pipe(sourcemaps.init())
 		.pipe(sass({ outputStyle: 'expanded' }).on('error', sass.logError))
 		.pipe(autoprefixer({ cascade: false }))
-		
-		// 1. Save out your normal custom style.css (Un-minified first to keep semicolons)
-		.pipe(gulp.dest(`${assetsBase}/scss`)) 
-		
-		// 2. Process raw style.css for RTL transformation without crashing
-		.pipe(gulp.src(`${assetsBase}/scss/style.css`, { allowEmpty: true }))
-		.pipe(rtlcss()) 
-		.pipe(rename({ suffix: '-rtl' })) 
-		.pipe(gulp.dest(`${assetsBase}/scss`)) 
-		
-		// 3. Minify all compiled production stylesheets together
-		.pipe(gulp.src(`${assetsBase}/scss/*.css`))
-		.pipe(cleanCSS())
+		.pipe(cleanCSS()) // Minifies both style.css and style-rtl.css natively
 		.pipe(sourcemaps.write('.'))
-		.pipe(gulp.dest(`${assetsBase}/scss`));
+		.pipe(gulp.dest(`${assetsBase}/scss`)); // ◄ Outputs both directly into your assets folder
 }
 
 // Framework CSS Libraries compile directly into the root style.css
