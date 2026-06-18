@@ -2,3 +2,15 @@ body {
     direction: rtl;
     unicode-bidi: embed;
 }
+.triggerMobileMenu {
+    span.hamburger-bar:nth-child(3) {
+        right: 0;
+    }
+    &.open  {
+        span.hamburger-bar:nth-child(3) {
+            right: -60px;
+            left: auto;
+        }
+
+    }
+}
