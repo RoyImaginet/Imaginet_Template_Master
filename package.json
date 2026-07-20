@@ -1,6 +1,6 @@
 {
 	"name": "imaginet",
-	"version": "3.0",
+	"version": "3.0.0",
 	"description": "A modern WordPress blank starter theme integrated with Gulp and Bootstrap.",
 	"main": "gulpfile.js",
 	"browserslist": [
