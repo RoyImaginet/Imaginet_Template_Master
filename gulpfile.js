@@ -9,7 +9,7 @@ const uglify = require('gulp-uglify');
 const cleanCSS = require('gulp-clean-css');
 const sass = require('gulp-sass')(require('sass')); 
 const sourcemaps = require('gulp-sourcemaps');
-const autoprefixer = require('gulp-autoprefixer').default; 
+const autoprefixer = require('gulp-autoprefixer'); 
 const gap = require('gulp-append-prepend');
 const clean = require('gulp-clean');
 
